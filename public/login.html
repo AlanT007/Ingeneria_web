@@ -96,13 +96,41 @@
           }
         }
       }
-    }
-
-    // Validación de contraseña (mínimo 8 y máximo 20 caracteres)
-    if (!(esAdmin || esOperador)) {
+      // Validación de contraseña
       if (password.length < 8 || password.length > 20) {
         document.getElementById("errorPassword").textContent = "La contraseña debe tener entre 8 y 20 caracteres.";
         valido = false;
+      } else {
+        let tieneMayus = false, tieneMinus = false, tieneNum = false, tieneEsp = false;
+
+        for (let i = 0; i < password.length; i++) {
+          let code = password.charCodeAt(i);
+          if (code >= 65 && code <= 90) tieneMayus = true;        // A-Z
+          else if (code >= 97 && code <= 122) tieneMinus = true;  // a-z
+          else if (code >= 48 && code <= 57) tieneNum = true;     // 0-9
+          else if (
+            (code >= 33 && code <= 47) ||
+            (code >= 58 && code <= 64) ||
+            (code >= 91 && code <= 96) ||
+            (code >= 123 && code <= 126)
+          ) {
+            tieneEsp = true;
+          }
+        }
+
+        if (!tieneMayus) {
+          document.getElementById("errorPassword").textContent = "Debe contener al menos una letra mayúscula.";
+          valido = false;
+        } else if (!tieneMinus) {
+          document.getElementById("errorPassword").textContent = "Debe contener al menos una letra minúscula.";
+          valido = false;
+        } else if (!tieneNum) {
+          document.getElementById("errorPassword").textContent = "Debe contener al menos un número.";
+          valido = false;
+        } else if (!tieneEsp) {
+          document.getElementById("errorPassword").textContent = "Debe contener al menos un carácter especial.";
+          valido = false;
+        }
       }
     }
 

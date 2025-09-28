@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url('https://cdn.shopify.com/s/files/1/0521/8844/6874/files/what_is_a_quarterback.png?v=1729993117');
+      background-size: cover;
+      background-position: center;
+    }
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 300px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 95%;
+      padding: 10px;
+      background: #00a000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .error {
+      color: red;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Iniciar Sesión</h2>
+    <form id="loginForm" onsubmit="login(event)">
+      <input type="text" id="usuario" name="usuario" placeholder="Usuario" required><br>
+      <span id="errorUsuario" class="error"></span>
+      <input type="password" id="password" name="password" placeholder="Contraseña" required><br>
+      <span id="errorPassword" class="error"></span>
+      <button type="submit">Ingresar</button>
+    </form>
+  </div>
+
+<script>
+  document.getElementById("loginForm").addEventListener("submit", validarFormulario);
+
+  async function validarFormulario(event) {
+    event.preventDefault();
+
+    document.getElementById("errorUsuario").textContent = "";
+    document.getElementById("errorPassword").textContent = "";
+
+    let usuario = document.getElementById("usuario").value.trim();
+    let password = document.getElementById("password").value.trim();
+    let valido = true;
+
+    const esAdmin = (usuario === "admin" && password === "admin123");
+    const esOperador = (usuario === "operador" && password === "operador123");
+
+    // Validación de usuario solo si no es Admin u Operador
+    if (!(esAdmin || esOperador)) {
+      if (usuario.length === 0 || (usuario.charCodeAt(0) >= 48 && usuario.charCodeAt(0) <= 57)) {
+        document.getElementById("errorUsuario").textContent = "El primer carácter no puede ser un número.";
+        valido = false;
+      } else if (!usuario.includes("@")) {
+        document.getElementById("errorUsuario").textContent = "El usuario debe contener un '@'.";
+        valido = false;
+      } else {
+        let puntos = usuario.split(".").length - 1;
+        if (puntos !== 1) {
+          document.getElementById("errorUsuario").textContent = "Debe haber exactamente un punto en el usuario.";
+          valido = false;
+        } else {
+          let posPunto = usuario.lastIndexOf(".");
+          let extension = usuario.length - posPunto - 1;
+          if (!(extension === 2 || extension === 3)) {
+            document.getElementById("errorUsuario").textContent = "Después del punto deben ir 2 o 3 caracteres.";
+            valido = false;
+          }
+        }
+      }
+    }
+
+    // Validación de contraseña (mínimo 8 y máximo 20 caracteres)
+    if (!(esAdmin || esOperador)) {
+      if (password.length < 8 || password.length > 20) {
+        document.getElementById("errorPassword").textContent = "La contraseña debe tener entre 8 y 20 caracteres.";
+        valido = false;
+      }
+    }
+
+    if (valido) {
+      try {
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, password })
+        });
+
+        if (!res.ok) {
+          const errorMsg = await res.text();
+          alert("Error: " + errorMsg);
+          return;
+        }
+
+        const data = await res.json(); 
+
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario", usuario);
+        localStorage.setItem("rol", data.rol);
+
+        if (data.rol === "admin") {
+          window.location.href = "main_admin.html";
+        } else if (data.rol === "operador") {
+          window.location.href = "main_operador.html";
+        } else {
+          window.location.href = "main_cliente.html";
+        }
+
+      } catch (err) {
+        console.error("Error al conectar con el backend:", err);
+        alert("No se pudo conectar al servidor.");
+      }
+    }
+  }
+</script>
+
+</body>
+</html>

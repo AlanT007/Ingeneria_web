@@ -54,28 +54,27 @@ app.post("/login", async (req, res) => {
     // Roles fijos
     if (usuario === "admin" && password === "admin123") {
       return res.json({ ok: true, rol: "admin" });
-    }
-    if (usuario === "operador" && password === "operador123") {
+    } else if (usuario === "operador" && password === "operador123") {
       return res.json({ ok: true, rol: "operador" });
     }
 
     // Clientes en Mongo
     const db = await conectarMongo();
     const collection = db.collection("usuarios");
-    let user = await collection.findOne({ usuario });
+    const user = await collection.findOne({ usuario });
 
-    if (!user) {
-      // Si no existe, lo creamos automáticamente como cliente
-      await collection.insertOne({ usuario, password, rol: "cliente" });
-      user = { usuario, password, rol: "cliente" };
-      console.log("Usuario creado automáticamente:", usuario);
-    }
-
-    // Verificación de contraseña
-    if (user.password === password) {
-      res.json({ ok: true, rol: user.rol });
+    if (user) {
+      // Usuario ya existe → validar contraseña
+      if (user.password === password) {
+        return res.json({ ok: true, rol: user.rol });
+      } else {
+        return res.status(401).json({ ok: false, msg: "Credenciales inválidas" });
+      }
     } else {
-      res.status(401).json({ ok: false, msg: "Credenciales inválidas" });
+      // Usuario no existe → se registra automáticamente
+      await collection.insertOne({ usuario, password, rol: "cliente" });
+      console.log("Usuario registrado automáticamente:", usuario);
+      return res.json({ ok: true, rol: "cliente" });
     }
   } catch (err) {
     console.error("Error en /login:", err);

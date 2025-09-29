@@ -90,7 +90,7 @@ app.post("/crear_usuario", async (req, res) => {
     const nuevo = new Usuario({ usuario, password, rol: "cliente" });
     await nuevo.save();
 
-    res.json({ ok: true, msg: "Usuario creado con éxito" });
+    res.json({ ok: true, msg: "Usuario creado con éxito!" });
 
   } catch (err) {
     console.error("Error en /crear_usuario:", err);

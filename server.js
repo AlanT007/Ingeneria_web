@@ -59,13 +59,21 @@ app.post("/login", async (req, res) => {
       return res.json({ ok: true, rol: "operador" });
     }
 
-    // Clientes desde Mongo
+    // Clientes en Mongo
     const db = await conectarMongo();
     const collection = db.collection("usuarios");
-    const user = await collection.findOne({ usuario, password });
+    let user = await collection.findOne({ usuario });
 
-    if (user) {
-      res.json({ ok: true, rol: "cliente" });
+    if (!user) {
+      // Si no existe, lo creamos automáticamente como cliente
+      await collection.insertOne({ usuario, password, rol: "cliente" });
+      user = { usuario, password, rol: "cliente" };
+      console.log("Usuario creado automáticamente:", usuario);
+    }
+
+    // Verificación de contraseña
+    if (user.password === password) {
+      res.json({ ok: true, rol: user.rol });
     } else {
       res.status(401).json({ ok: false, msg: "Credenciales inválidas" });
     }

@@ -11,7 +11,7 @@ const dbName = "AppLogin";
 app.use(express.json()); 
 app.use(express.static(path.join(__dirname, "public"))); 
 
-// Conexión Mongo
+// Conexión a MongoDB
 async function conectarMongo() {
   if (!client.topology?.isConnected()) {
     await client.connect();
@@ -20,36 +20,19 @@ async function conectarMongo() {
   return client.db(dbName);
 }
 
-// landing_page
+// Página principal
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "landing_page.html"));
 });
 
-// Registro de cliente
-app.post("/guardar", async (req, res) => {
-  try {
-    const { usuario, password } = req.body;
-    if (!usuario || !password) {
-      return res.status(400).json({ ok: false, msg: "Faltan datos" });
-    }
-
-    const db = await conectarMongo();
-    const collection = db.collection("usuarios");
-
-    // Guardamos como cliente por defecto
-    await collection.insertOne({ usuario, password, rol: "cliente" });
-
-    res.json({ ok: true, rol: "cliente" });
-  } catch (err) {
-    console.error("Error en /guardar:", err);
-    res.status(500).json({ ok: false, msg: "Error en el servidor" });
-  }
-});
-
-// Login
+// Login con registro automático
 app.post("/login", async (req, res) => {
   try {
     const { usuario, password } = req.body;
+
+    if (!usuario || !password) {
+      return res.status(400).json({ ok: false, msg: "Faltan datos" });
+    }
 
     // Roles fijos
     if (usuario === "admin" && password === "admin123") {
@@ -58,20 +41,20 @@ app.post("/login", async (req, res) => {
       return res.json({ ok: true, rol: "operador" });
     }
 
-    // Clientes en Mongo
+    // Buscar usuario en Mongo
     const db = await conectarMongo();
     const collection = db.collection("usuarios");
     const user = await collection.findOne({ usuario });
 
     if (user) {
-      // Usuario ya existe → validar contraseña
+      // Validar contraseña
       if (user.password === password) {
         return res.json({ ok: true, rol: user.rol });
       } else {
         return res.status(401).json({ ok: false, msg: "Credenciales inválidas" });
       }
     } else {
-      // Usuario no existe → se registra automáticamente
+      // Usuario no existe → registrar automáticamente
       await collection.insertOne({ usuario, password, rol: "cliente" });
       console.log("Usuario registrado automáticamente:", usuario);
       return res.json({ ok: true, rol: "cliente" });
@@ -82,6 +65,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Iniciar servidor
 app.listen(3000, () => {
   console.log("Servidor corriendo en http://localhost:3000");
 });
+

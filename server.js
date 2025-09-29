@@ -17,7 +17,7 @@ const server = http.createServer(async (req, res) => {
   // Sirve archivos estáticos de /public
   if (req.method === "GET") {
     let filePath = "";
-    if (req.url === "/") filePath = "./public/landing_pageg.html";
+    if (req.url === "/") filePath = "./public/landing_page.html";
     else filePath = `./public${req.url}`;
 
     fs.readFile(filePath, (err, content) => {

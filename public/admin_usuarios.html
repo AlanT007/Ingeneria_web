@@ -63,7 +63,7 @@
   }
 
   async function cargarUsuarios() {
-    const res = await fetch("/admin/usuarios", {
+    const res = await fetch("/admin_usuarios", {
       headers: { "Authorization": "Bearer " + getToken() }
     });
     const data = await res.json();

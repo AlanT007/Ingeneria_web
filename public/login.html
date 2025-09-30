@@ -58,49 +58,50 @@
     <a class="link" href="crear_usuario.html">¿No tienes cuenta? Crea un usuario</a>
   </div>
 
-<script>
-  document.getElementById("loginForm").addEventListener("submit", login);
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", login);
 
-  async function login(event) {
-    event.preventDefault();
+    async function login(event) {
+      event.preventDefault();
 
-    const usuario = document.getElementById("usuario").value.trim();
-    const password = document.getElementById("password").value.trim();
+      const usuario = document.getElementById("usuario").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-    try {
-      const res = await fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, password })
-      });
+      try {
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, password })
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!res.ok || !data.ok) {
-        alert("Error: " + (data.msg || "Credenciales inválidas"));
-        return;
+        if (!res.ok || !data.ok) {
+          alert("Error: " + (data.msg || "Credenciales inválidas"));
+          return;
+        }
+
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("usuario", usuario);
+          localStorage.setItem("rol", data.rol);
+
+          // Redirección según rol
+          if (data.rol === "admin") {
+            window.location.href = "admin_usuarios.html";
+          } else if (data.rol === "operador") {
+            window.location.href = "operador.html";
+          } else {
+            window.location.href = "cliente.html";
+          }
+        } else {
+          alert(data.msg || "Error desconocido");
+        }
+      } catch (err) {
+        console.error("Error al conectar con el backend:", err);
+        alert("No se pudo conectar al servidor.");
       }
-
-      // Guardar sesión en localStorage
-      localStorage.setItem("usuario", usuario);
-      localStorage.setItem("rol", data.rol);
-
-      // Redirigir según el rol
-      if (data.rol === "admin") {
-        window.location.href = "main_admin.html";
-      } else if (data.rol === "operador") {
-        window.location.href = "main_operador.html";
-      } else {
-        window.location.href = "main_cliente.html";
-      }
-
-    } catch (err) {
-      console.error("Error al conectar con el backend:", err);
-      alert("No se pudo conectar al servidor.");
     }
-  }
-</script>
-
+  </script>
 </body>
 </html>
-

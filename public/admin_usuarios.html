@@ -58,78 +58,97 @@
   <p id="msg"></p>
 
   <script>
-    async function cargarUsuarios() {
-      const res = await fetch("/admin/usuarios");
-      const data = await res.json();
-      const tbody = document.querySelector("#tablaUsuarios tbody");
-      tbody.innerHTML = "";
+  function getToken() {
+    return localStorage.getItem("token");
+  }
 
-      data.usuarios.forEach(u => {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${u._id}</td>
-          <td><input value="${u.usuario}" id="user-${u._id}"></td>
-          <td><input value="${u.password}" id="pass-${u._id}"></td>
-          <td>
-            <select id="rol-${u._id}">
-              <option value="cliente" ${u.rol === "cliente" ? "selected" : ""}>Cliente</option>
-              <option value="operador" ${u.rol === "operador" ? "selected" : ""}>Operador</option>
-              <option value="admin" ${u.rol === "admin" ? "selected" : ""}>Administrador</option>
-            </select>
-          </td>
-          <td>
-            <button onclick="editarUsuario('${u._id}')">Editar</button>
-            <button onclick="eliminarUsuario('${u._id}')">Eliminar</button>
-          </td>
-        `;
-        tbody.appendChild(fila);
-      });
+  async function cargarUsuarios() {
+    const res = await fetch("/admin/usuarios", {
+      headers: { "Authorization": "Bearer " + getToken() }
+    });
+    const data = await res.json();
+    const tbody = document.querySelector("#tablaUsuarios tbody");
+    tbody.innerHTML = "";
+
+    if (!data.usuarios) {
+      document.getElementById("msg").textContent = data.msg || "Error cargando usuarios";
+      return;
     }
 
-    async function crearUsuario() {
-      const usuario = document.getElementById("nuevoUsuario").value;
-      const password = document.getElementById("nuevoPassword").value;
-      const rol = document.getElementById("nuevoRol").value;
-      const msg = document.getElementById("msg");
+    data.usuarios.forEach(u => {
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${u._id}</td>
+        <td><input value="${u.usuario}" id="user-${u._id}"></td>
+        <td><input value="${u.password}" id="pass-${u._id}"></td>
+        <td>
+          <select id="rol-${u._id}">
+            <option value="cliente" ${u.rol === "cliente" ? "selected" : ""}>Cliente</option>
+            <option value="operador" ${u.rol === "operador" ? "selected" : ""}>Operador</option>
+            <option value="admin" ${u.rol === "admin" ? "selected" : ""}>Administrador</option>
+          </select>
+        </td>
+        <td>
+          <button onclick="editarUsuario('${u._id}')">Editar</button>
+          <button onclick="eliminarUsuario('${u._id}')">Eliminar</button>
+        </td>
+      `;
+      tbody.appendChild(fila);
+    });
+  }
 
-      const res = await fetch("/admin/usuarios", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, password, rol })
-      });
+  async function crearUsuario() {
+    const usuario = document.getElementById("nuevoUsuario").value;
+    const password = document.getElementById("nuevoPassword").value;
+    const rol = document.getElementById("nuevoRol").value;
+    const msg = document.getElementById("msg");
 
-      const data = await res.json();
-      msg.textContent = data.msg;
-      cargarUsuarios();
-    }
+    const res = await fetch("/admin/usuarios", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + getToken()
+      },
+      body: JSON.stringify({ usuario, password, rol })
+    });
 
-    async function editarUsuario(id) {
-      const usuario = document.getElementById(`user-${id}`).value;
-      const password = document.getElementById(`pass-${id}`).value;
-      const rol = document.getElementById(`rol-${id}`).value;
-      const msg = document.getElementById("msg");
-
-      const res = await fetch(`/admin/usuarios/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, password, rol })
-      });
-
-      const data = await res.json();
-      msg.textContent = data.msg;
-      cargarUsuarios();
-    }
-
-    async function eliminarUsuario(id) {
-      const res = await fetch(`/admin/usuarios/${id}`, { method: "DELETE" });
-      const data = await res.json();
-      const msg = document.getElementById("msg");
-      msg.textContent = data.msg;
-      cargarUsuarios();
-    }
-
-    // Cargar la tabla al inicio
+    const data = await res.json();
+    msg.textContent = data.msg;
     cargarUsuarios();
-  </script>
+  }
+
+  async function editarUsuario(id) {
+    const usuario = document.getElementById(`user-${id}`).value;
+    const password = document.getElementById(`pass-${id}`).value;
+    const rol = document.getElementById(`rol-${id}`).value;
+    const msg = document.getElementById("msg");
+
+    const res = await fetch(`/admin/usuarios/${id}`, {
+      method: "PUT",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + getToken()
+      },
+      body: JSON.stringify({ usuario, password, rol })
+    });
+
+    const data = await res.json();
+    msg.textContent = data.msg;
+    cargarUsuarios();
+  }
+
+  async function eliminarUsuario(id) {
+    const res = await fetch(`/admin/usuarios/${id}`, { 
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + getToken() }
+    });
+    const data = await res.json();
+    const msg = document.getElementById("msg");
+    msg.textContent = data.msg;
+    cargarUsuarios();
+  }
+
+  cargarUsuarios();
+</script>
 </body>
 </html>

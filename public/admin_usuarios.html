@@ -27,6 +27,11 @@
     #msg { 
     margin-top: 15px; 
     font-weight: bold; }
+    .link {
+      margin-top: 15px;
+      display: block;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -56,7 +61,7 @@
   <button onclick="crearUsuario()">Crear</button>
 
   <p id="msg"></p>
-
+  <a class="link" href="main_admin.html">Volver a la página principal</a>
   <script>
   function getToken() {
     return localStorage.getItem("token");

@@ -1,12 +1,114 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<title>Page Title</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Main Operador - Gestión de Jugadores</title>
 </head>
 <body>
 
-<h1>OPERADOR</h1>
-<p>Bienvenido a la página principal</p>
+  <h1>Gestión de Jugadores - Operador</h1>
+
+  <!-- Tabla de jugadores -->
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Foto</th>
+        <th>Nombre</th>
+        <th>Posición</th>
+        <th>Número</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-jugadores"></tbody>
+  </table>
+
+  <!-- Formulario de creación -->
+  <h2>Agregar nuevo jugador</h2>
+  <input type="text" id="nuevoNombre" placeholder="Nombre"><br>
+  <input type="text" id="nuevoPosicion" placeholder="Posición"><br>
+  <input type="number" id="nuevoNumero" placeholder="Número"><br>
+  <input type="text" id="nuevoFoto" placeholder="URL de foto"><br>
+  <textarea id="nuevoDesc" placeholder="Descripción"></textarea><br>
+  <button onclick="agregarJugador()">Agregar</button>
+
+<script>
+  let jugadores = [
+    {
+      nombre: "Juan Pérez",
+      posicion: "Quarterback",
+      numero: 12,
+      foto: "https://randomuser.me/api/portraits/men/32.jpg",
+      desc: "Líder del equipo con gran precisión en los pases."
+    },
+    {
+      nombre: "Carlos López",
+      posicion: "Wide Receiver",
+      numero: 88,
+      foto: "https://randomuser.me/api/portraits/men/45.jpg",
+      desc: "Rápido y con manos seguras para atrapar el balón."
+    }
+  ];
+
+  function renderTabla() {
+    const tbody = document.getElementById("tabla-jugadores");
+    tbody.innerHTML = "";
+    jugadores.forEach((j, i) => {
+      const row = `
+        <tr>
+          <td><img src="${j.foto}" alt="${j.nombre}" width="60" height="60"></td>
+          <td><input type="text" id="nombre-${i}" value="${j.nombre}"></td>
+          <td><input type="text" id="posicion-${i}" value="${j.posicion}"></td>
+          <td><input type="number" id="numero-${i}" value="${j.numero}"></td>
+          <td>
+            <button onclick="guardarJugador(${i})">Guardar</button>
+            <button onclick="eliminarJugador(${i})">Eliminar</button>
+          </td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+  }
+
+  function agregarJugador() {
+    const nombre = document.getElementById("nuevoNombre").value.trim();
+    const posicion = document.getElementById("nuevoPosicion").value.trim();
+    const numero = document.getElementById("nuevoNumero").value.trim();
+    const foto = document.getElementById("nuevoFoto").value.trim();
+    const desc = document.getElementById("nuevoDesc").value.trim();
+
+    if (!nombre || !posicion || !numero) {
+      alert("Por favor completa todos los campos obligatorios");
+      return;
+    }
+
+    jugadores.push({ nombre, posicion, numero, foto, desc });
+    renderTabla();
+
+    document.getElementById("nuevoNombre").value = "";
+    document.getElementById("nuevoPosicion").value = "";
+    document.getElementById("nuevoNumero").value = "";
+    document.getElementById("nuevoFoto").value = "";
+    document.getElementById("nuevoDesc").value = "";
+  }
+
+  function guardarJugador(i) {
+    jugadores[i].nombre = document.getElementById(`nombre-${i}`).value.trim();
+    jugadores[i].posicion = document.getElementById(`posicion-${i}`).value.trim();
+    jugadores[i].numero = document.getElementById(`numero-${i}`).value.trim();
+    alert("Jugador actualizado");
+    renderTabla();
+  }
+
+  function eliminarJugador(i) {
+    if (confirm("¿Seguro que deseas eliminar este jugador?")) {
+      jugadores.splice(i, 1);
+      renderTabla();
+    }
+  }
+
+  renderTabla();
+</script>
 
 </body>
 </html>

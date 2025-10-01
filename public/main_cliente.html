@@ -1,12 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<title>Page Title</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página principal (Cliente)</title>
 </head>
 <body>
 
-<h1>CLIENTE</h1>
-<p>Bienvenido a la página principal</p>
+  <h2>Jugadores - Flag Splinters Football</h2>
+
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Foto</th>
+        <th>Nombre</th>
+        <th>Posición</th>
+        <th>Número</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-jugadores">
+      <!-- La tabla se llena con JavaScript -->
+    </tbody>
+  </table>
+
+  <!-- Modal básico -->
+  <div id="modal" style="display:none; position:fixed; top:20%; left:30%; background:white; border:1px solid black; padding:10px;">
+    <h2 id="modal-nombre"></h2>
+    <img id="modal-foto" src="" alt="Foto jugador" width="120" height="120"><br>
+    <p><strong>Posición:</strong> <span id="modal-posicion"></span></p>
+    <p><strong>Número:</strong> <span id="modal-numero"></span></p>
+    <p id="modal-desc"></p>
+    <button onclick="cerrarModal()">Cerrar</button>
+  </div>
+
+<script>
+  // Datos de ejemplo
+  const jugadores = [
+    {
+      nombre: "Juan Pérez",
+      posicion: "Quarterback",
+      numero: 12,
+      foto: "https://randomuser.me/api/portraits/men/32.jpg",
+      desc: "Líder del equipo con gran precisión en los pases."
+    },
+    {
+      nombre: "Carlos López",
+      posicion: "Wide Receiver",
+      numero: 88,
+      foto: "https://randomuser.me/api/portraits/men/45.jpg",
+      desc: "Rápido y con manos seguras para atrapar el balón."
+    },
+    {
+      nombre: "Miguel Torres",
+      posicion: "Linebacker",
+      numero: 54,
+      foto: "https://randomuser.me/api/portraits/men/78.jpg",
+      desc: "Defensor fuerte, especializado en detener la carrera."
+    }
+  ];
+
+  // Llenar tabla
+  const tabla = document.getElementById("tabla-jugadores");
+  jugadores.forEach((j, i) => {
+    const row = `
+      <tr>
+        <td><img src="${j.foto}" alt="${j.nombre}" width="60" height="60"></td>
+        <td>${j.nombre}</td>
+        <td>${j.posicion}</td>
+        <td>${j.numero}</td>
+        <td><button onclick="verJugador(${i})">Ver más</button></td>
+      </tr>
+    `;
+    tabla.innerHTML += row;
+  });
+
+  // Modal
+  const modal = document.getElementById("modal");
+
+  function verJugador(i) {
+    const j = jugadores[i];
+    document.getElementById("modal-nombre").textContent = j.nombre;
+    document.getElementById("modal-foto").src = j.foto;
+    document.getElementById("modal-posicion").textContent = j.posicion;
+    document.getElementById("modal-numero").textContent = j.numero;
+    document.getElementById("modal-desc").textContent = j.desc;
+    modal.style.display = "block";
+  }
+
+  function cerrarModal() {
+    modal.style.display = "none";
+  }
+</script>
 
 </body>
 </html>

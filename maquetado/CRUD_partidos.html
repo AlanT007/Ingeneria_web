@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Administrar Partidos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><h1>Gestión de Partidos</h1></header>
+  <nav>
+    <a href="main_operador.html">Inicio</a>
+    <a href="admin_jugadores.html">Jugadores</a>
+    <a href="admin_partidos.html">Partidos</a>
+    <a href="login.html">Cerrar Sesión</a>
+  </nav>
+
+  <main>
+    <h2>Lista de Partidos</h2>
+    <table id="tablaPartidos">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Rival</th>
+          <th>Resultado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input value="15/11/2025"></td>
+          <td><input value="Thunder Hawks"></td>
+          <td><input value="21 - 17"></td>
+          <td>
+            <button>Editar</button>
+            <button>Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Agregar Partido</h2>
+    <input type="text" placeholder="Fecha">
+    <input type="text" placeholder="Rival">
+    <input type="text" placeholder="Resultado">
+    <button>Agregar</button>
+  </main>
+</body>
+</html>

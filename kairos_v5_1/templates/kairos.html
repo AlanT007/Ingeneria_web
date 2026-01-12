@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+
+{% load static %}
+
+<head>
+    <meta name="viewport" content="with=device-width, initial-scale=1.0">
+    <title> KAIROS </title>
+    <link rel="stylesheet" href="{% static 'kairos_style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script type="text/javascript" src="{% static 'kairos_script.js' %}" defer></script>
+
+    <style>
+        .respuesta-ia span { white-space: pre-wrap; }
+        .send-button-style {
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: inherit;
+        }
+    </style>
+
+</head>
+
+<body>
+    <main>
+
+    <nav class="nav-main">
+        <div class="nav-links">
+            <a class="kairos_name" href="{% url 'main' %}">KAIROS</a>
+            {% if user.is_authenticated %}
+            <a type="submit" class="acceder_button" href="{% url 'logout' %}">CERRAR SESION</a>
+            {% else %}
+            <a type="submit" class="acceder_button" href="{% url 'login' %}">ACCESO</a>
+            {% endif %}
+        </div>
+    </nav>
+
+        <label>
+            <input class="hamburguer-button" type="checkbox">
+            <div class="toggle-menu">
+                <span class="top_line common"></span>
+                <span class="middle_line common"></span>
+                <span class="bottom_line common"></span>
+            </div>
+
+            <div class="slide-menu-hambuguer">
+
+                <h3>
+                    ¡En la zona de Elite!
+                </h3>
+                <hr>
+                <ul>
+                    <li>
+                        <label>
+                            <input class="perfil-button" type="checkbox">
+                            <div class="toggle-perfil">
+                                <i class="fa-solid fa-circle-user"></i>
+                                <span>Perfil</span>
+                            </div>
+                            
+                            <div class="perfil-menu">
+
+                                <div id="configurar_perfil" style="display: none;"> <form method="POST" action="{% url 'main' %}"> 
+                                        {% csrf_token %}
+                                        <h2> Edición de Métricas </h2>
+                                        <h3> ¿Que deseas cambiar? </h3>
+
+                                        {% for message in messages %}
+                                        <h3 style="color: red; font-size: 0.9rem;">{{message}}</h3>
+                                        {% endfor %}
+
+                                        <div class="input-box">
+                                            <input type="number" step="0.01" placeholder="Peso en Kg" id="peso" name="Peso_actualizado">
+                                            <span> Kg </span>
+                                        </div>
+                                        <div class="input-box">
+                                            <input type="number" step="0.01" placeholder="Altura (ej. 1.75m)" id="altura" name="Altura_actualizada">
+                                            <span> m </span>
+                                        </div>
+                                        <div class="input-box">
+                                            <input type="number" placeholder="Edad" id="edad" name="Edad_actualizada">
+                                        </div>
+
+                                        <div class="select-box">
+                                            <span> Nivel de experiencia: </span>
+                                            <select name="Nivel_actualizado" id="nivel">
+                                                <option value="" disabled selected>Selecciona un Nivel</option>
+                                                {% for valor, texto in niveles %}
+                                                    <option value="{{ valor }}">{{ texto }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="select-box">
+                                            <span> Objetivo Principal: </span>
+                                            <select name="Objetivo_actualizado" id="objetivo">
+                                                <option value="" disabled selected>Selecciona tu Objetivo</option>
+                                                {% for valor, texto in objetivos %}
+                                                    <option value="{{ valor }}">{{ texto }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="select-box">
+                                            <span> Deporte: </span>
+                                            <select name="Deporte_actualizado" id="deporte">
+                                                <option value="" disabled selected>Selecciona tu Deporte</option>
+                                                {% for valor, texto in deportes %}
+                                                    <option value="{{ valor }}">{{ texto }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="save_changes">
+                                            <button type="submit" class="save_changes_button" name="Guardar_met" value="respuesta_send_met">
+                                                <span>Guardar cambios</span>
+                                            </button>
+                                        </div>
+
+                                        <div class="save_changes">
+                                            <button type="button" class="save_changes_button" id="cancelar_btn">
+                                                <span>Cancelar</span>
+                                            </button>
+                                        </div>
+
+                                    </form>
+                                </div>
+
+                                {% if user.is_authenticated %}
+                                <h3>Perfil de {{user.username}}</h3>
+                                {% else %}
+                                <h3>No has iniciado Sesion</h3>
+                                {% endif %}
+
+                                <h3>Metricas fisicas:</h3>
+                                <ul>
+                                    <li>
+                                        {% if metricas %}
+                                        <a>Edad: {{ metricas.edad }} años</a>
+                                        {% else %}
+                                        <a>Edad: --</a>
+                                        {% endif %}
+                                    </li>
+                                    <li>
+                                        {% if metricas %}
+                                        <a>Altura: {{ metricas.altura }} m</a>
+                                        {% else %}
+                                        <a>Altura: --</a>
+                                        {% endif %}
+                                    </li>
+                                    <li>
+                                        {% if metricas %}
+                                        <a>Peso: {{ metricas.peso }} kg</a>
+                                        {% else %}
+                                        <a>Peso: --</a>
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                                <h3>Entrenamiento:</h3>
+                                <ul>
+                                    <li>
+                                        {% if metricas %}
+                                        <a>Deporte: {{ metricas.deporte }}</a>
+                                        {% else %}
+                                        <a>Deporte: --</a>
+                                        {% endif %}
+                                    </li>
+                                    <li>
+                                        {% if metricas %}
+                                        <a>Nivel: {{ metricas.nivel }}</a>
+                                        {% else %}
+                                        <a>Nivel: --</a>
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                                <h3>Objetivo:</h3>
+                                <span>
+                                    {% if metricas %}
+                                    {{ metricas.objetivo }}
+                                    {% else %}
+                                    Sin objetivo definido
+                                    {% endif %}
+                                </span>
+
+                                {% if user.is_authenticated %}
+                                <div class="save_changes">
+                                    <button type="button" class="save_changes_button" id="perfil_config">
+                                        <span>Editar Perfil <i class="fa-regular fa-pen-to-square"></i> </span>
+                                    </button>
+                                </div>
+                                {% endif %}
+
+                            </div>
+                        </label>
+                    </li>
+
+                    <li>
+                        <label>
+                            <input class="configuracion-button" type="checkbox">
+                            <div class="toggle-configuracion">
+                                <i class="fa-solid fa-gears"></i>
+                                <span>Configuracion</span>
+                            </div>
+
+                            <div class="configuracion-menu">
+                                <form method="POST" action="{% url 'main' %}">
+                                    {% csrf_token %}
+                                    
+                                    <h3>Nivel de motivación:</h3>
+
+                                    {% if user.is_authenticated %}
+                                    <div class="stepper">
+                                        <input type="range" min="0" max="9" name="nivel_psico" class="input_stepper" value="{{ config.nivel_psico|default:5 }}">
+                                        <div class="custom-input">
+                                            <button type="button" class="menos-stepper">-</button>
+                                            <div class="stepper-rango">
+                                                <div class="stepper-list"></div>
+                                            </div>
+                                            <button type="button" class="mas-stepper">+</button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <h3>Modo Competencia:</h3>
+                                    {% if user.is_authenticated %}
+                                    <div class="switch-container">
+                                        <input type="checkbox" class="check-comp" name="modo_competencia" id="check" {% if config.modo_competencia %}checked{% endif %}>
+                                        <label for="check" class="comp-switch"></label>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if user.is_authenticated %}
+                                    <div class="save_changes">
+                                        <button type="submit" class="save_changes_button" name="Guardar_config" value="respuesta_send_config">
+                                            <span>Guardar cambios</span>
+                                        </button>
+                                    </div>
+                                    {% endif %}
+
+                                </form>
+                            </div>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input class="preguntas-button" id="pre_button" type="checkbox">
+                            <div class="toggle-preguntas">
+                                <i class="fa-regular fa-circle-question"></i>
+                                <span>Preguntas frecuentes</span>
+                            </div>
+
+                            <div class="preguntas-menu">
+                                <h3>¿Qué es KAIROS?</h3>
+                                <p>
+                                    Tu asistente de élite para entrenamiento, <br>
+                                    asesoría deportiva y motivación psicológica <br>
+                                    integral.
+                                </p>
+                                <h3>¿Cómo se crea mi rutina?</h3>
+                                <p>
+                                    Se personaliza con precisión usando tus <br>
+                                    métricas físicas y objetivo.
+                                </p>
+                                <h3>¿Qué es el Modo Motivacional?</h3>
+                                <p>
+                                    Es una escala (1-10) que ajusta la voz de <br>
+                                    KAIROS (de técnico a terapéutico) y el nivel de <br>
+                                    desafío según tu necesidad emocional.
+                                </p>
+                                <h3>¿Cómo actualizo mis datos?</h3>
+                                <p>
+                                    Puedes cambiar tu peso y métricas en la <br>
+                                    sección Perfil y ajustar el tono de la IA en Configuración.
+                                </p>
+                            </div>
+                        </label>
+                    </li>
+                </ul>
+                <hr>
+                <div class="modo_obscuro">
+                    <span>Modo Oscuro: </span>
+                    <button id="theme-switch">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Zm0-80q88 0 158-48.5T740-375q-20 5-40 8t-40 3q-123 0-209.5-86.5T364-660q0-20 3-40t8-40q-78 32-126.5 102T200-480q0 116 82 198t198 82Zm-10-270Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-360q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm0 80q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Zm326-268Z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </label>
+
+        <div class="welcome_text">
+            {% if user.is_authenticated %}
+            <h1>Bienvenido {{user.username}}</h1>
+            {% else %}
+            <h1>Bienvenido a Kairos</h1>
+            {% endif %}
+        </div>
+
+        <nav class="gen-text">
+            <div class="text-area">
+                <div class="text-area-received">
+                    <div class="text-received">
+                        <span>¡Hola! 💪 Soy KAIROS, tu entrenador de élite. <br> 
+                            ¿Listo para llevar tu rendimiento al siguiente nivel? 🔥</span>
+                    </div>
+                </div>
+
+                {% for datos in historial %}
+                
+                {% if datos.mensaje_usuario %}
+                <div class="text-sent-area">
+                    <div class="text-sent">
+                        <span>{{ datos.mensaje_usuario }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if datos.respuesta_ia %}
+                <div class="text-area-received respuesta-ia">
+                    <div class="text-received">
+                        <span>{{ datos.respuesta_ia }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% endfor %}
+                {% if respuesta %}
+                
+                <div class="text-sent-area">
+                    <div class="text-sent">
+                        <span>{{ solicitud }}</span>
+                    </div>
+                </div>
+
+                <div class="text-area-received respuesta-ia" id="ultima-respuesta">
+                    <div class="text-received">
+                        <span>{{ respuesta }}</span>
+                    </div>
+                </div>
+                
+                {% endif %}
+
+            </div>
+        </nav>
+
+        <nav class="gen_buttons-area">
+            <div class="gen_buttons">
+                <button type="button" id="ini_gen_rutina">Generar Rutina</button>
+            </div>
+        </nav>
+
+
+        <form method="POST" class="chat-area" id="chat-form">
+            {% csrf_token %} 
+            
+            <div>
+                <textarea class="chat-box" id="chat-input" name="mensaje" placeholder="Escribe tu mensaje aqui..." required></textarea>
+            </div>
+        
+            <button type="submit" id="send_button" class="send-button-style" name="Enviar" value="respuesta_send">
+                <i class="fa fa-paper-plane"></i>
+            </button>
+        </form>
+
+    </main>
+
+    <div class="loader"></div>
+
+    <script>
+        const editPerfil = document.getElementById('perfil_config')
+        const cancelEditPerfil = document.getElementById('cancelar_btn')
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const chatInput = document.getElementById("chat-input");
+            const chatForm = document.getElementById("chat-form");
+            const sendButton = document.getElementById("send_button");
+            const icon = sendButton.querySelector("i");
+            const btnRutina = document.getElementById('ini_gen_rutina');
+
+            function scrollToBottom() {
+                const respuestaNueva = document.getElementById("ultima-respuesta");
+                if (respuestaNueva) {
+                    setTimeout(() => {
+                        respuestaNueva.scrollIntoView({ behavior: "smooth", block: "end" });
+                    }, 300);
+                } 
+                else {
+                    setTimeout(() => {
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    }, 100);
+                }
+            }
+            
+            scrollToBottom();
+
+
+            function activarCarga() {
+                icon.className = 'fa fa-spinner fa-spin'; 
+                sendButton.style.opacity = '0.7';
+            }
+                    
+            if (btnRutina) {
+                btnRutina.addEventListener('click', function() {
+                    chatInput.value = "Analiza mis métricas actuales, mi deporte y mi objetivo. Genera una rutina de entrenamiento completa para hoy.";
+                    document.getElementById('send_button').click();
+                });
+            }
+                    
+            chatInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); 
+                    document.getElementById('send_button').click(); 
+                }
+            });
+                    
+            chatForm.addEventListener('submit', function() {
+                activarCarga();
+            });
+        });
+
+        if (editPerfil) {
+            editPerfil.addEventListener("click", () => {
+                var configPerfil = document.getElementById('configurar_perfil')
+                if(configPerfil.style.display !== "none") {
+                    configPerfil.style.display = "none";
+                }
+                else{
+                    configPerfil.style.display = "block";
+                }
+            })
+        }
+
+        if (cancelEditPerfil) {
+            cancelEditPerfil.addEventListener("click", () => {
+                var configPerfil = document.getElementById('configurar_perfil')
+                if(configPerfil.style.display === "none") {
+                    configPerfil.style.display = "block";
+                }
+                else{
+                    configPerfil.style.display = "none";
+                }
+            })
+        }
+
+    </script>
+
+</body>
+</html>
